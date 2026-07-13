@@ -1,0 +1,13 @@
+# 每台机器各自的 python 路径配置
+config.json
+
+# 依赖
+node_modules/
+
+# 运行中间产物（脚本成功后会自动删，异常时可能残留）
+content_temp.json
+*_temp.json
+
+# 误建的 netstat 垃圾文件（本机网络信息，勿入库）
+C:WindowsTempallconns.txt
+*allconns.txt

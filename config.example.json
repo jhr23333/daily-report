@@ -1,0 +1,5 @@
+{
+  "_说明": "复制本文件为 config.json，把 pythonPath 改成你机器上装了 iFinD 助手依赖的 python。",
+  "_如何找python": "命令行运行  where python  或在 Anaconda Prompt 里运行  where python  取第一条完整路径。",
+  "pythonPath": "D:\\anaconda3\\python.exe"
+}
