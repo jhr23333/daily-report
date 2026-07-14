@@ -3,7 +3,6 @@
     "allow": [
       "mcp__hexin-ifind-ds-stock-mcp__get_stock_performance",
       "mcp__hexin-ifind-ds-news-mcp__search_news",
-      "mcp__hexin-ifind-ds-news-mcp__search_trending_news",
       "mcp__hexin-ifind-ds-edb-mcp__get_edb_data",
       "mcp__hexin-ifind-ds-edb-mcp__search_edb"
     ]

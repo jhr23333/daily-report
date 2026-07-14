@@ -6,9 +6,10 @@
   - 推荐时段：**15:05-24:00**（收盘后至当日结束）
   - 若当前时间早于 15:05，请提示用户"A股尚未收盘结算，请 15:05 之后重试"并终止
 
-【第一步：同一条消息并行发出以下4个调用】
+【第一步：同一条消息并行发出以下3个调用】
 
-⚠️ search_trending_news 和 search_news 是 deferred 工具，必须先通过 ToolSearch 加载 schema 才能调用。将 ToolSearch 与其他3个调用一起并行发出；新闻调用须等 ToolSearch 返回 schema 后才能执行——因此新闻调用在第二批发出（见下文）。
+⚠️ search_news 是 deferred 工具，必须先通过 ToolSearch 加载 schema 才能调用。将 ToolSearch 与其他2个调用一起并行发出；新闻调用须等 ToolSearch 返回 schema 后才能执行——因此新闻调用在第二批发出（见下文）。
+📌 原「调用4 — search_trending_news」已于 2026-07-14 确认从 hexin-ifind-ds-news-mcp 下线（服务器仅剩 search_news / search_notice），已从本流程移除；催化事件素材改由 search_news 覆盖（见调用4、调用5）。
 
 调用1 — Bash（读取近期2份报告风格参考）：
 cd "D:/daily report" && node -e "
@@ -28,7 +29,7 @@ Promise.all(files.map(f =>
 直接调用 iFinD 本地接口（`C:\Users\53271\.ifind\ifind_helper.py`）一次性拿 7 个代码的结构化四字段。
   - 不再使用 MCP 的 `get_stock_performance`（NLP bug 多：创业板指误识、涨跌幅关键词触发错误集、字段不稳定）
   - 不再使用 search_news 作为行情主通道（不需要反推，iFinD 原数据精度到小数点后 4 位）
-  - 新闻工具保留，仅服务于 section2 的盘面素材与 trending_news 的催化事件
+  - 新闻工具保留，仅服务于 section2 的盘面素材与催化事件
 
 调用2 — PowerShell（iFinD 一次性取三大指数 + 国证芯片 + 三只 ETF 行情，⚠️ 日期 [YYYY-MM-DD] 替换为今日，如 2026-04-21）：
 ⚙️ python 路径：若项目根目录存在 config.json，用其中的 pythonPath 替换下面命令里的 `D:\anaconda3\python.exe`（供其他机器/实习生自配）；不存在 config.json 时直接用默认路径。
@@ -55,21 +56,22 @@ Promise.all(files.map(f =>
   - 若任一代码字段为 null 或整个 JSON 解析失败，终止任务
 
 调用3 — ToolSearch（与调用1、2并行，加载新闻工具 schema）：
-query: "select:mcp__hexin-ifind-ds-news-mcp__search_trending_news,mcp__hexin-ifind-ds-news-mcp__search_news"
-max_results: 2
+query: "select:mcp__hexin-ifind-ds-news-mcp__search_news"
+max_results: 1
 
-【调用1、2、3均返回后，同一条消息并行发出以下2个新闻调用】
+【调用1、2、3均返回后，发出新闻调用】
 
-调用4 — search_trending_news（热门事件，捕捉半导体催化）：
-time_scope=6小时, industry_name=电子, size=10
-⚠️ 不传 keyword 参数，避免双重过滤导致空结果；time_scope 固定 6小时，15:05 运行时回溯窗口覆盖完整交易时段
-
-调用5 — search_news（半导体板块盘面行情与个股表现，section2 素材）：
+调用4 — search_news（半导体板块盘面行情与个股表现，section2 主素材）：
 query: "半导体 芯片 板块 收评 个股 涨停 盘面 [今日日期，如4月21日]"
 time_start: 今日日期（YYYY-MM-DD 格式）
 time_end: 今日日期（YYYY-MM-DD 格式，与 time_start 相同）
 size: 8
 ⚠️ time_end 使用当日（不用次日），减少次日早盘数据混入；size 调高至 8 获取更丰富盘面素材
+
+调用5（可选）— search_news 二次补充（仅当调用4素材未覆盖当日主要催化/热点方向时才发）：
+query: 用 3-5 个宽泛关键词点名缺口方向，如 "存储 涨价 个股 走强" / "半导体 设备 材料 上涨"
+time_start / time_end / size 同调用4
+⚠️ 关键词堆叠过多、过细（如同时带日期+多个板块名）会直接返回空结果；若二次查询为空，直接凭调用4素材成文，不再重试
 
 ⚠️ 查询规则：
 - 若调用2任一代码数据缺失（close 为空或代码不在返回字典中），终止任务，不写文件，不运行脚本
