@@ -18,8 +18,11 @@
 ## 硬性前提
 
 - **北京时间 15:05 之后**才能跑（A股收盘结算完成），否则数据是盘中价。
-- iFinD 行情取数依赖 `~/.ifind/ifind_helper.py` + 本人 iFinD 账号（`node setup_ifind.js` 录入）。
-- 新闻素材依赖 iFinD 新闻 MCP（`hexin-ifind-ds-news-mcp`）。
+- **仅限 Windows**（依赖 PowerShell / `SuperCommand.exe` / Windows 路径）。
+- iFinD 行情取数依赖 `~/.ifind/ifind_helper.py`（仓库 `ifind-toolkit/` 提供）+ iFinD SDK（`iFinDPy`，`InstallPython.bat` 安装）+ 本人 iFinD 账号（`node setup_ifind.js` 录入）。
+- `config.json` 的 python 必须是装了 `iFinDPy` 的那个 python。
+- 新闻素材依赖 iFinD 新闻 MCP（`hexin-ifind-ds-news-mcp`，HTTP 型，需本人 51ifind token；仅用 `search_news`，`search_trending_news` 已下线）。
+- **上手前需负责人开通**：本人 iFinD 账号、iFinD SDK 下载权限、本人 51ifind MCP token。安装详见 [README.md](README.md) 与 [ifind-toolkit/README.md](ifind-toolkit/README.md)。
 
 ## 脚本一览
 

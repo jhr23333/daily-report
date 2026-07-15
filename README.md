@@ -13,20 +13,35 @@
 
 ---
 
+## ⚠️ 开始前：先找负责人（江老师）开通这 3 样
+
+这三样**不在仓库里、也没法放进仓库**，是绑定账号/授权的东西，必须先要到，否则后面每一步都卡住：
+
+| 要什么 | 干嘛用 | 备注 |
+|--------|--------|------|
+| **① 你自己的 iFinD 账号（席位）** | 登录客户端 + 取行情数据 | 每人一个账号，不能和别人共用（会互相顶掉登录） |
+| **② iFinD 数据接口安装包下载权限** | 安装 `THSDataInterface_Windows`（提供 `iFinDPy`） | 从 iFinD 客户端 / 官方渠道下载，需要账号权限 |
+| **③ 你自己的 51ifind MCP token** | 新闻 MCP（`hexin-ifind-ds-news-mcp`）鉴权 | 一段 JWT。**用你自己的，别用别人的**；见下方「配置新闻 MCP」 |
+
+> 💻 **仅限 Windows**：整套流程依赖 PowerShell、`SuperCommand.exe`、Windows 路径，Mac/Linux 跑不了。
+
+---
+
 ## ① 第一次装环境（只做一次）
 
-新机器上按顺序装好这几样，**每一步都不能跳**：
+拿到上面 3 样后，按顺序装好这几样，**每一步都不能跳**：
 
 | # | 装什么 | 怎么验证 |
 |---|--------|----------|
 | 0 | **项目放在 `D:\daily report`** | 命令里写死了这个路径，把整个项目文件夹放到 `D:\daily report`，其余步骤零改动 |
-| 1 | **Node.js**（18+） | 命令行 `node -v` 有版本号 |
-| 2 | **项目依赖** | 在项目目录运行 `npm install`（装 adm-zip、mammoth） |
-| 3 | **iFinD 助手 + SDK** | 见下方「iFinD 配置」（工具本体已在仓库 `ifind-toolkit/`） |
-| 4 | **填自己的 iFinD 账号** | 运行 `node setup_ifind.js` 录入你自己的账号密码 |
-| 5 | **iFinD 客户端登录** | 启动 `SuperCommand.exe` 并登录**同一个**你自己的 iFinD 账号 |
-| 6 | **Claude Code + iFinD 新闻 MCP** | 确认 `hexin-ifind-ds-news-mcp` 已连接 |
-| 7 | **config.json** | 见下方「配置 python 路径」 |
+| 1 | **Claude Code** | 命令行 `claude --version` 有版本号（这套流程靠它跑 `/daily-report`） |
+| 2 | **Node.js**（18+） | 命令行 `node -v` 有版本号 |
+| 3 | **项目依赖** | 在项目目录运行 `npm install`（装 adm-zip、mammoth） |
+| 4 | **iFinD 助手 + SDK** | 见下方「iFinD 配置」（工具本体已在仓库 `ifind-toolkit/`） |
+| 5 | **填自己的 iFinD 账号** | 运行 `node setup_ifind.js` 录入你自己的账号密码 |
+| 6 | **iFinD 客户端登录** | 启动 `SuperCommand.exe` 并登录**同一个**你自己的 iFinD 账号 |
+| 7 | **config.json（python 路径）** | 见下方「配置 python 路径」 |
+| 8 | **iFinD 新闻 MCP** | 见下方「配置新闻 MCP」，`/mcp` 里能看到 `hexin-ifind-ds-news-mcp` 已连接 |
 
 ### iFinD 配置
 1. **安装助手脚本**：本仓库已自带工具本体，见 [`ifind-toolkit/`](ifind-toolkit/README.md)。按它的说明把 `ifind_helper.py` 复制到你的 `C:\Users\你的用户名\.ifind\`。**仓库里不含 `credentials.json`**（账号密码每人用自己的，见第 3 步）。
@@ -43,6 +58,20 @@
 1. 命令行运行 `where python`，复制第一条完整路径（通常是 Anaconda 里的 `python.exe`）。
 2. 把项目里的 `config.example.json` 复制一份改名为 `config.json`。
 3. 把 `pythonPath` 改成上一步那条路径（注意 Windows 路径用双反斜杠 `\\`）。
+
+> ⚠️ **关键**：`config.json` 里填的这个 python，必须是第 4 步 `InstallPython.bat` **装进 `iFinDPy` 的那个 python**。装 SDK 时用的哪个 python 环境，这里就填哪个，否则会「python 能跑但 import iFinDPy 失败」。
+
+### 配置新闻 MCP（`hexin-ifind-ds-news-mcp`）
+`/daily-report` 的盘面新闻素材来自这个 HTTP MCP，必须在你的 Claude Code 里加好、且用**你自己的** token（向负责人要你那份 51ifind MCP token，别用别人的）。
+
+在命令行运行（把 `<你的token>` 换成实际 JWT）：
+```bash
+claude mcp add --transport http --scope user hexin-ifind-ds-news-mcp \
+  https://api-mcp.51ifind.com:8643/ds-mcp-servers/hexin-ifind-ds-news-mcp \
+  --header "Authorization: <你的token>"
+```
+加完在 Claude Code 里跑 `/mcp`，看到 `hexin-ifind-ds-news-mcp` 状态为 connected 即可。
+> token 是明文凭证，别写进仓库、别外发。
 
 ### 装完自检
 ```bash
@@ -83,11 +112,14 @@ node preflight.js
 | `iFinD 取数` 字段异常 | 账号被别处顶掉 | 确认没人用同一账号，重新登录 |
 | `node preflight.js` 报 python 跑不了 | pythonPath 不对 | `where python` 重新填 `config.json` |
 | 合规检查 🔴 被拦 | 稿子踩了红线 | 按打印的问题改 `content_temp.json` 或让 Claude 重写对应段落 |
-| 新闻工具返回空 | MCP 没连 / 关键词太窄 | 确认 `hexin-ifind-ds-news-mcp` 已连接 |
+| 新闻工具返回空 / 报 401 / 无此工具 | MCP 没连 / token 无效过期 / 关键词太窄 | `/mcp` 看 `hexin-ifind-ds-news-mcp` 是否 connected；401 就是 token 问题，找负责人要新的重配 |
+| `import iFinDPy` 失败 | config.json 的 python 不是装了 SDK 的那个 | 用装 SDK 的那个 python 路径填 `config.json`，或对该 python 重跑 `InstallPython.bat` |
 | 生成的 docx 打不开/太短 | 模板缺失 | 确认 `reports/` 里有历史报告作模板 |
 
-### 什么时候找负责人
+### 什么时候找负责人（江老师）
+- **开通类**（上手必需）：你自己的 iFinD 账号、iFinD SDK 下载权限、你自己的 51ifind MCP token
 - iFinD 账号 / `~/.ifind` 目录 / `credentials.json` 相关问题
+- 新闻 MCP 连不上或报 401（token 失效）
 - 合规红线拿不准（尤其 🟡 情绪词、涉概念股异动澄清的表述）
 - **对外发布前的终稿把关**（合规敏感稿件，发前请负责人过目）
 
