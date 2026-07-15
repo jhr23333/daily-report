@@ -22,15 +22,15 @@
 | 0 | **项目放在 `D:\daily report`** | 命令里写死了这个路径，把整个项目文件夹放到 `D:\daily report`，其余步骤零改动 |
 | 1 | **Node.js**（18+） | 命令行 `node -v` 有版本号 |
 | 2 | **项目依赖** | 在项目目录运行 `npm install`（装 adm-zip、mammoth） |
-| 3 | **iFinD 助手目录 + SDK** | 见下方「iFinD 配置」 |
+| 3 | **iFinD 助手 + SDK** | 见下方「iFinD 配置」（工具本体已在仓库 `ifind-toolkit/`） |
 | 4 | **填自己的 iFinD 账号** | 运行 `node setup_ifind.js` 录入你自己的账号密码 |
 | 5 | **iFinD 客户端登录** | 启动 `SuperCommand.exe` 并登录**同一个**你自己的 iFinD 账号 |
 | 6 | **Claude Code + iFinD 新闻 MCP** | 确认 `hexin-ifind-ds-news-mcp` 已连接 |
 | 7 | **config.json** | 见下方「配置 python 路径」 |
 
 ### iFinD 配置
-1. **拿到助手目录**：向负责人索取 `.ifind` 工具目录，放到你的用户目录下（`C:\Users\你的用户名\.ifind\`），里面要有 `ifind_helper.py`。**不要拷贝里面的 `credentials.json`**（那是别人的账号）。
-2. **装 SDK**：运行 iFinD 的 `THSDataInterface_Windows\bin\x64\InstallPython.bat`，让 `import iFinDPy` 能直接用。
+1. **安装助手脚本**：本仓库已自带工具本体，见 [`ifind-toolkit/`](ifind-toolkit/README.md)。按它的说明把 `ifind_helper.py` 复制到你的 `C:\Users\你的用户名\.ifind\`。**仓库里不含 `credentials.json`**（账号密码每人用自己的，见第 3 步）。
+2. **装 SDK**：向负责人要 iFinD 客户端下载权限，装 `THSDataInterface_Windows`，运行 `bin\x64\InstallPython.bat`，让 `import iFinDPy` 能直接用。详见 [`ifind-toolkit/README.md`](ifind-toolkit/README.md)。
 3. **填你自己的账号**：在项目目录运行
    ```bash
    node setup_ifind.js
